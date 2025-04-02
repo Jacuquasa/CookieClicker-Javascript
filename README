@@ -1,1 +1,186 @@
 
+// Click The Big Cookie
+const clickCookieSpeed = 25;
+const bigCookie = document.getElementById("bigCookie");
+for (var i = 0; i < 6; i++) {
+  setInterval(() => {
+    bigCookie.click();
+  }, clickCookieSpeed);
+}
+
+
+// Click shimmer
+const clickShimmerSpeed = 5000;
+setInterval(() => {
+  const shimmers = document.getElementsByClassName("shimmer");
+  if (shimmers) {
+    for (var i = 0; i < shimmers.length; i++) {
+      shimmers[i].click();
+    }
+  }
+}, clickShimmerSpeed);
+
+// Buy minMax product on timer, if possible buy upgrade
+const buyProductSpeed = 3000;
+setInterval(() => {
+  let highestVal = 0;
+  let buyProduct = null;
+  let upgradeArray = null;
+  let productXEight = null;
+  let objByIdArray = Game.ObjectsById;
+  let productIdState = null;
+  //finds product that gives highest value
+  for (obj of objByIdArray) {
+    let currentValue = obj.storedCps / obj.price;
+    productIdState = document.getElementById(["product" + obj.id]).className;
+    if (productIdState.includes("product unlocked")) {
+      if (currentValue > highestVal) {
+        buyProduct = obj;
+        highestVal = currentValue;
+      }
+    }
+  }
+
+
+  if (buyProduct) {
+    //compare product price times 8 against cheapest upgrade price (always index 0)
+    upgradeArray = Game.UpgradesInStore;
+    productXEight = buyProduct.price * 5;
+    if (upgradeArray.length > 0) {
+      if (productXEight < upgradeArray[0].basePrice) {
+        buyProduct.buy();
+      } else {
+        upgradeArray[0].click();
+      }
+      //Made if there by any chance aren't any upgrades to buy
+    } else {
+      buyProduct.buy();
+    }
+  }
+}, buyProductSpeed);
+
+//Close notes
+const clickNotesSpeed = 30000;
+setInterval(() => {
+  const notes = document.getElementsByClassName("framed close sidenote");
+  if (notes) {
+    for (var i = 0; i < notes.length; i++) {
+      notes[i].click();
+    }
+  }
+}, clickNotesSpeed);
+
+
+//Upgrades the dragon if unlocked
+setInterval(() => {
+  if (Game.Upgrades["How to bake your dragon"].bought) {
+    while (Game.dragonLevel < Game.dragonLevels.length - 1) {
+      Game.UpgradeDragon();
+    }
+  }
+}, 3600000); //once every hour
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Other cool stuff
+
+//Bypass price for products
+let productId = 0; // 0 is Cursor and so on until 19 or 20
+Game.cookies += Game.ObjectsById[productId].price;
+Game.ObjectsById[productId].buy();
+
+//spawn all wrinklers
+Game.wrinklers.forEach(i => Game.SpawnWrinkler(i));
+
+//set all wrinklers to golden
+Game.wrinklers.forEach(i => i.type = 1);
+
+//bypass buy function in a product. Smack in a foreach if you want this rule for all of them.
+Game.ObjectsById[0].buy = function (amount = 100) {
+  if (Game.buyMode == -1) { this.sell(Game.buyBulk, 1); return 0; }
+  var success = 0;
+  var moni = 0;
+  var bought = 0;
+  if (!amount) amount = Game.buyBulk;
+  if (amount == -1) amount = 1000;
+  var price = this.getPrice();
+  bought++;
+  moni += price;
+  this.amount++;
+  this.bought++;
+  price = this.getPrice();
+  this.price = price;
+  if (this.buyFunction) this.buyFunction();
+  Game.recalculateGains = 1;
+  if (this.amount == 1 && this.id != 0) l('row' + this.id).classList.add('enabled');
+  this.highest = Math.max(this.highest, this.amount);
+  Game.BuildingsOwned++;
+  success = 1;
+
+
+  if (success) { PlaySound('snd/buy' + choose([1, 2, 3, 4]) + '.mp3', 0.75); this.refresh(); }
+  //if (moni>0 && amount>1) Game.Notify(this.name,'Bought <b>'+bought+'</b> for '+Beautify(moni)+' cookies','',2);
+};
+
+
+Game.ObjectsById.forEach(i => i.buy = function (amount) {
+  if (Game.buyMode == -1) { this.sell(Game.buyBulk, 1); return 0; }
+  var success = 0;
+  var moni = 0;
+  var bought = 0;
+  if (!amount) amount = Game.buyBulk;
+  if (amount == -1) amount = 1000;
+  for (var i = 0; i < amount; i++) {
+    var price = this.getPrice();
+    bought++;
+    moni += price;
+    this.amount++;
+    this.bought++;
+    price = this.getPrice();
+    this.price = price;
+    if (this.buyFunction) this.buyFunction();
+    Game.recalculateGains = 1;
+    if (this.amount == 1 && this.id != 0) l('row' + this.id).classList.add('enabled');
+    this.highest = Math.max(this.highest, this.amount);
+    Game.BuildingsOwned++;
+    success = 1;
+
+  }
+  if (success) { PlaySound('snd/buy' + choose([1, 2, 3, 4]) + '.mp3', 0.75); this.refresh(); }
+  //if (moni>0 && amount>1) Game.Notify(this.name,'Bought <b>'+bought+'</b> for '+Beautify(moni)+' cookies','',2);
+});
+
+
+//Change Grannys name
+const grandmas = Game.grandmaNames;
+for (var i = 0; i < grandmas.length; i++) {
+  grandmas[i] = "Granny";
+}
+
+//change names of big numbers
+let formatLong = formatLong;
+for (var i = 0; i < formatLong.length; i++) {
+  formatLong[i] = " very big number";
+}
+
+
+//get all achievments (might need slight adjustment)
+let allAchievmentsById = Game.AchievementsById;
+for (var i = 0; i < allAchievmentsById.length; i++) {
+  Game.Achievements[i.name].won = 1;
+}
+
+
+
+Game.RuinTheFun();
+Game.Achievements["Cheated cookies taste awful"].won = 0;
