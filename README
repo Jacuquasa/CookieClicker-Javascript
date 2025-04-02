@@ -1,4 +1,4 @@
-//From line 90 and below it's the fun stuff
+//The Automaticc Part is from here until line 82
 
 // Click The Big Cookie
 const clickCookieSpeed = 25;
